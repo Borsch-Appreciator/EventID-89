@@ -25,10 +25,14 @@ Once I had the information down I ran the Source IP against VirusTotal and Hybri
 I saw that on VirusTotal0/91 vendors flagged it as malicious but it has a community score of -14 which is something to keep in mind. 
 
 <br/>
-<img src="https://imgur.com/a/7ypsOev" alt="VirusTotal result"/>
+<img src="https://i.imgur.com/D2Xz8Rm.png" height="80%" width="80%" alt="VirusTotal result"/>
 <br />
 
-On HybridAnalysis it came back with a threatscore of 50/100 which is not indicative of it being benign.
+On HybridAnalysis it came back with a threatscore of 50/100 which is not indicative of it being harmless.
+
+<br/>
+<img src="https://i.imgur.com/DxIHoS8.png" height="80%" width="80%" alt="VirusTotal result"/>
+<br />
 
 Already off the bat, the requested URL is extremely suspicious (https://172.16.20.6/userNumber=1 AND (SELECT * FROM Users) = 1) this is definitely indicative of a SQL injection attack where you input SQL into fields or url to access the underlying data.
 
