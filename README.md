@@ -110,3 +110,36 @@ I completed this step during the initial investigation.
 Finally, the playbook requested any relevant artifacts. I submitted the source IP address:
 101[.]32[.]223[.]119
 After completing the playbook and submitting my findings, I submitted the case and received confirmation that my analysis was correct.
+
+## MITRE ATT&CK Mapping
+
+
+|Tactic|Initial Access|
+|-----|-----|
+|Technique|T1190 - Exploit Public-Facing Application|
+|Evidence|SQL injection attempts against the web application using crafted userNumber parameters.|
+
+|Tactic|Execution|
+|-----|-----|
+|Technique|T1505.003 - Server Software Component: Web Shell|
+|Evidence|Attacker uploaded and executed PHP web shell code through SQL injection.|
+
+|Tactic|Discovery|
+|-----|-----|
+|Technique|T1082 - System Information Discovery|
+|Evidence|Execution of whoami and id commands through the web shell.|
+
+|Tactic|Command and Control|
+|-----|-----|
+|Technique|T1059.004 - Unix Shell|
+|Evidence|Shell commands executed from the web shell.|
+
+|Tactic|Command and Control|
+|-----|-----|
+|Technique|T1095 - Non-Application Layer Protocol|
+|Evidence|Netcat was used to establish a remote shell connection.|
+
+|Tactic|Exfiltration|
+|-----|-----|
+|Technique|T1048 - Exfiltration Over Alternative Protocol|
+|Evidence|Potential database access and outbound communication via Netcat.|
